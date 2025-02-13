@@ -3,5 +3,11 @@
 *.egg-info
 *.swp
 tags
-node_modules
-__pycache__
+payment_integration_utils/docs/current
+node_modules/
+
+## Build Files ###
+dist/
+
+### Vs Code ###
+.vscode/
