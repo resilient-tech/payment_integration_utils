@@ -157,12 +157,12 @@ WORKFLOWS = [
             {
                 "state": WORKFLOW_STATE.DRAFT.value,
                 "doc_status": 0,
-                "allow_edit": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
+                "allow_edit": ROLE_PROFILE.PAYMENT_AUTHORIZER.value,
             },
             {
                 "state": WORKFLOW_STATE.PENDING_APPROVAL.value,
                 "doc_status": 0,
-                "allow_edit": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
+                "allow_edit": ROLE_PROFILE.PAYMENT_AUTHORIZER.value,
             },
             {
                 "state": WORKFLOW_STATE.REJECTED.value,
@@ -192,21 +192,21 @@ WORKFLOWS = [
                 "state": WORKFLOW_STATE.DRAFT.value,
                 "action": WORKFLOW_ACTION.REQUEST_APPROVAL.value,
                 "next_state": WORKFLOW_STATE.PENDING_APPROVAL.value,
-                "allowed": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
+                "allowed": ROLE_PROFILE.PAYMENT_AUTHORIZER.value,
                 "allow_self_approval": True,
             },
             {
                 "state": WORKFLOW_STATE.PENDING_APPROVAL.value,
                 "action": WORKFLOW_ACTION.APPROVE.value,
                 "next_state": WORKFLOW_STATE.APPROVED.value,
-                "allowed": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
+                "allowed": ROLE_PROFILE.PAYMENT_AUTHORIZER.value,
                 "allow_self_approval": True,
             },
             {
                 "state": WORKFLOW_STATE.PENDING_APPROVAL.value,
                 "action": WORKFLOW_ACTION.REJECT.value,
                 "next_state": WORKFLOW_STATE.REJECTED.value,
-                "allowed": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
+                "allowed": ROLE_PROFILE.PAYMENT_AUTHORIZER.value,
                 "allow_self_approval": True,
             },
             {

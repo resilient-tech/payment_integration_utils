@@ -1,8 +1,5 @@
 from frappe.permissions import ADMIN_ROLE, ALL_USER_ROLE
 
-from payment_integration_utils.payment_integration_utils.constants import (
-    SETTING_DOCTYPE,
-)
 from payment_integration_utils.payment_integration_utils.constants.enums import BaseEnum
 
 
@@ -15,8 +12,6 @@ class ROLE_PROFILE(BaseEnum):
     BANK_ACC_USER = "Bank Account User"
 
     PAYMENT_AUTHORIZER = "Online Payments Authorizer"
-    # cannot pay, only can change settings of automation
-    AUTO_PAYMENTS_MANAGER = "Auto Payments Manager"
 
 
 class PERMISSION_LEVEL(BaseEnum):
@@ -56,13 +51,6 @@ PERMISSIONS = {
 
 
 ROLES = [
-    ## Auto Payment Setting ##
-    {
-        "doctype": SETTING_DOCTYPE,
-        "role_name": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
-        "permlevels": PERMISSION_LEVEL.ZERO.value,
-        "permissions": PERMISSIONS["Manager"],
-    },
     ## Bank ##
     {
         "doctype": "Bank",
@@ -89,44 +77,11 @@ ROLES = [
         "permlevels": PERMISSION_LEVEL.ZERO.value,
         "permissions": PERMISSIONS["User"],
     },
-    {
-        "doctype": "Bank Account",
-        "role_name": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
-        "permlevels": PERMISSION_LEVEL.ZERO.value,
-        "permissions": PERMISSIONS["Basic"],
-    },
     ## Payment Entry ##
-    {
-        "doctype": "Payment Entry",
-        "role_name": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
-        "permlevels": PERMISSION_LEVEL.ZERO.value,
-        "permissions": PERMISSIONS["User"],
-    },
     {
         "doctype": "Payment Entry",
         "role_name": ROLE_PROFILE.PAYMENT_AUTHORIZER.value,
         "permlevels": [PERMISSION_LEVEL.ZERO.value, PERMISSION_LEVEL.SEVEN.value],
         "permissions": PERMISSIONS["Manager"],
-    },
-    # Customer
-    {
-        "doctype": "Customer",
-        "role_name": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
-        "permlevels": PERMISSION_LEVEL.SEVEN.value,
-        "permissions": PERMISSIONS["User"],
-    },
-    # Supplier
-    {
-        "doctype": "Supplier",
-        "role_name": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
-        "permlevels": PERMISSION_LEVEL.SEVEN.value,
-        "permissions": PERMISSIONS["User"],
-    },
-    # Employee
-    {
-        "doctype": "Employee",
-        "role_name": ROLE_PROFILE.AUTO_PAYMENTS_MANAGER.value,
-        "permlevels": PERMISSION_LEVEL.SEVEN.value,
-        "permissions": PERMISSIONS["User"],
     },
 ]
