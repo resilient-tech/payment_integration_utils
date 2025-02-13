@@ -19,4 +19,15 @@ doctype_js = {
     "User": "payment_integration_utils/client_overrides/form/user.js",
 }
 
+
+doc_events = {
+    "Payment Entry": {
+        "onload": "payment_integration_utils.payment_integration_utils.server_overrides.doctype.payment_entry.onload",
+        "validate": "payment_integration_utils.payment_integration_utils.server_overrides.doctype.payment_entry.validate",
+    },
+    "Bank Account": {
+        "validate": "payment_integration_utils.payment_integration_utils.server_overrides.doctype.bank_account.validate",
+    },
+}
+
 before_payment_authentication = "payment_integration_utils.payment_integration_utils.utils.permission.has_payment_permissions"
