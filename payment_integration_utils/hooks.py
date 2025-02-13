@@ -14,9 +14,9 @@ app_include_js = "payment_integration_utils.bundle.js"
 export_python_type_annotations = True
 
 doctype_js = {
-    "Payment Entry": "payment_integration_utils/client_overrides/payment_entry.js",
-    "Bank Account": "payment_integration_utils/client_overrides/bank_account.js",
-    "User": "payment_integration_utils/client_overrides/user.js",
+    "Payment Entry": "payment_integration_utils/client_overrides/form/payment_entry.js",
+    "Bank Account": "payment_integration_utils/client_overrides/form/bank_account.js",
+    "User": "payment_integration_utils/client_overrides/form/user.js",
 }
 
 before_payment_authentication = "payment_integration_utils.payment_integration_utils.utils.permission.has_payment_permissions"
