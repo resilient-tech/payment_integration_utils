@@ -1,8 +1,13 @@
 import frappe
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from frappe import _
+from frappe.core.doctype.submission_queue.submission_queue import queue_submission
 from frappe.utils import fmt_money
+from frappe.utils.scheduler import is_scheduler_inactive
 
+from payment_integration_utils.payment_integration_utils.constants.payments import (
+    BANK_METHODS,
+)
 from payment_integration_utils.payment_integration_utils.constants.payments import (
     TRANSFER_METHOD as PAYMENT_METHOD,
 )
@@ -13,12 +18,6 @@ from payment_integration_utils.payment_integration_utils.utils.validation import
     validate_ifsc_code,
 )
 
-BANK_METHOD = [
-    PAYMENT_METHOD.IMPS.value,
-    PAYMENT_METHOD.NEFT.value,
-    PAYMENT_METHOD.RTGS.value,
-]
-
 
 #### DOC EVENTS ####
 def onload(doc: PaymentEntry, method=None):
@@ -28,6 +27,14 @@ def onload(doc: PaymentEntry, method=None):
 
 
 def validate(doc: PaymentEntry, method=None):
+    # maybe occur when doc is duplicated
+    if (
+        doc.party_bank_account
+        and not doc.make_bank_online_payment
+        and doc.payment_transfer_method == PAYMENT_METHOD.LINK.value
+    ):
+        doc.payment_transfer_method = PAYMENT_METHOD.NEFT.value
+
     if (
         not doc.make_bank_online_payment
         or not doc.integration_docname
@@ -38,6 +45,7 @@ def validate(doc: PaymentEntry, method=None):
     validate_transfer_methods(doc, method)
 
 
+### VALIDATION HELPERS ###
 def validate_transfer_methods(doc: PaymentEntry, method=None):
     validate_bank_payment_method(doc)
     validate_upi_payment_method(doc)
@@ -45,7 +53,7 @@ def validate_transfer_methods(doc: PaymentEntry, method=None):
 
 
 def validate_bank_payment_method(doc: PaymentEntry):
-    if doc.payment_transfer_method not in BANK_METHOD:
+    if doc.payment_transfer_method not in BANK_METHODS:
         return
 
     if not (
@@ -172,3 +180,108 @@ def get_party_contact_details(doc: PaymentEntry) -> dict | None:
         ["mobile_no as contact_mobile", "email_id as contact_email"],
         as_dict=True,
     )
+
+
+### APIs ###
+@frappe.whitelist()
+def bulk_pay_and_submit(
+    auth_id: str,
+    docnames: list[str] | str,
+    mark_online_payment: bool | None = False,
+    task_id: str | None = None,
+):
+    """
+    Bulk pay and submit Payment Entries.
+
+    :param auth_id: Authentication ID (after otp or password verification)
+    :param docnames: List of Payment Entry to pay and submit
+    :param mark_online_payment: Check `make_bank_online_payment` field
+    :param task_id: Task ID (realtime or background)
+
+    ---
+    Reference: [Frappe Bulk Submit/Cancel](https://github.com/frappe/frappe/blob/3eda272bd61b1e73b74d30b1704d885a39c75d0c/frappe/desk/doctype/bulk_update/bulk_update.py#L51)
+    """
+
+    if isinstance(docnames, str):
+        docnames = frappe.parse_json(docnames)
+
+    has_payment_permissions(docnames, throw=True)
+
+    if len(docnames) < 20:
+        return _bulk_pay_and_submit(
+            auth_id,
+            docnames,
+            mark_online_payment,
+            task_id,
+        )
+    elif len(docnames) <= 500:
+        frappe.msgprint(_("Bulk operation is enqueued in background."), alert=True)
+        frappe.enqueue(
+            _bulk_pay_and_submit,
+            auth_id=auth_id,
+            docnames=docnames,
+            mark_online_payment=mark_online_payment,
+            task_id=task_id,
+            queue="short",
+            timeout=1000,
+        )
+    else:
+        frappe.throw(
+            _("Bulk operations only support up to 500 documents."),
+            title=_("Too Many Documents"),
+        )
+
+
+def _bulk_pay_and_submit(
+    auth_id: str,
+    docnames: list[str],
+    mark_online_payment: bool | None = False,
+    task_id: str | None = None,
+):
+    """
+    Bulk pay and submit Payment Entries.
+
+    :param auth_id: Authentication ID (after otp or password verification)
+    :param docnames: List of Payment Entry to pay and submit
+    :param mark_online_payment: Check `make_bank_online_payment` field
+    :param task_id: Task ID (realtime or background)
+
+    ---
+    Reference: [Frappe Bulk Action](https://github.com/frappe/frappe/blob/3eda272bd61b1e73b74d30b1704d885a39c75d0c/frappe/desk/doctype/bulk_update/bulk_update.py#L73)
+    """
+    failed = []
+
+    num_documents = len(docnames)
+
+    for idx, docname in enumerate(docnames, 1):
+        doc = frappe.get_doc("Payment Entry", docname)
+        doc.set_onload("auth_id", auth_id)
+
+        if mark_online_payment:
+            doc.make_bank_online_payment = 1
+
+        try:
+            message = ""
+            if doc.docstatus.is_draft():
+                if doc.meta.queue_in_background and not is_scheduler_inactive():
+                    queue_submission(doc, "submit")
+                    message = _("Queuing {0} for Submission").format("Payment Entry")
+                else:
+                    doc.submit()
+                    message = _("Submitting {0}").format("Payment Entry")
+            else:
+                failed.append(docname)
+
+            frappe.db.commit()
+            frappe.publish_progress(
+                percent=idx / num_documents * 100,
+                title=message,
+                description=docname,
+                task_id=task_id,
+            )
+
+        except Exception:
+            failed.append(docname)
+            frappe.db.rollback()
+
+    return failed
