@@ -1,8 +1,7 @@
 import click
-
-from payment_integration_utils.constants import BUG_REPORT_URL
-from payment_integration_utils.hooks import app_title as APP_NAME
-from payment_integration_utils.setup import delete_customizations
+from payment_integration_utils_mode_co.constants import BUG_REPORT_URL
+from payment_integration_utils_mode_co.hooks import app_title as APP_NAME
+from payment_integration_utils_mode_co.setup import delete_customizations
 
 
 def before_uninstall():

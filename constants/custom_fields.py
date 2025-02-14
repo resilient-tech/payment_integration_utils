@@ -10,11 +10,11 @@ Note:
         ...
 """
 
-from payment_integration_utils.payment_integration_utils.constants.payments import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.payments import (
     BANK_METHODS,
     TRANSFER_METHOD,
 )
-from payment_integration_utils.payment_integration_utils.constants.roles import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.roles import (
     PERMISSION_LEVEL,
 )
 

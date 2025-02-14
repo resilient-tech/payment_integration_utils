@@ -1,22 +1,23 @@
 import click
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-
-from payment_integration_utils.payment_integration_utils.constants.custom_fields import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.custom_fields import (
     CUSTOM_FIELDS,
 )
-from payment_integration_utils.payment_integration_utils.constants.property_setters import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.property_setters import (
     PROPERTY_SETTERS,
 )
-from payment_integration_utils.payment_integration_utils.constants.roles import ROLES
-from payment_integration_utils.payment_integration_utils.constants.workflows import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.roles import (
+    ROLES,
+)
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.workflows import (
     STATES_COLORS as WORKFLOW_STATES,
 )
-from payment_integration_utils.payment_integration_utils.constants.workflows import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.workflows import (
     WORKFLOW_ACTION,
     WORKFLOWS,
 )
-from payment_integration_utils.payment_integration_utils.utils import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.utils import (
     delete_custom_fields,
     delete_property_setters,
     delete_roles_and_permissions,

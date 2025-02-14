@@ -32,9 +32,10 @@ from frappe.twofactor import (
 )
 from frappe.utils import cint, fmt_money
 from frappe.utils.password import check_password, decrypt, encrypt
-
-from payment_integration_utils.payment_integration_utils.constants.enums import BaseEnum
-from payment_integration_utils.payment_integration_utils.constants.roles import (
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.enums import (
+    BaseEnum,
+)
+from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.roles import (
     ROLE_PROFILE,
 )
 

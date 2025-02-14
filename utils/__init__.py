@@ -14,8 +14,7 @@ from frappe.utils import (
     get_timestamp,
     getdate,
 )
-
-from payment_integration_utils.constants import SECONDS_IN_A_DAY
+from payment_integration_utils_mode_co.constants import SECONDS_IN_A_DAY
 
 ################# APIs RELATED #################
 
