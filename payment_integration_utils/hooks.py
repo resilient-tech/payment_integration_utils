@@ -19,6 +19,10 @@ doctype_js = {
     "User": "payment_integration_utils/client_overrides/form/user.js",
 }
 
+doctype_list_js = {
+    "Payment Entry": "payment_integration_utils/client_overrides/list/payment_entry_list.js",
+}
+
 
 doc_events = {
     "Payment Entry": {
