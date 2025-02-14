@@ -4,6 +4,9 @@ from frappe import _
 from frappe.utils import fmt_money
 
 from payment_integration_utils.payment_integration_utils.constants.payments import (
+    BANK_METHODS,
+)
+from payment_integration_utils.payment_integration_utils.constants.payments import (
     TRANSFER_METHOD as PAYMENT_METHOD,
 )
 from payment_integration_utils.payment_integration_utils.utils.auth import (
@@ -12,12 +15,6 @@ from payment_integration_utils.payment_integration_utils.utils.auth import (
 from payment_integration_utils.payment_integration_utils.utils.validation import (
     validate_ifsc_code,
 )
-
-BANK_METHOD = [
-    PAYMENT_METHOD.IMPS.value,
-    PAYMENT_METHOD.NEFT.value,
-    PAYMENT_METHOD.RTGS.value,
-]
 
 
 #### DOC EVENTS ####
@@ -28,6 +25,14 @@ def onload(doc: PaymentEntry, method=None):
 
 
 def validate(doc: PaymentEntry, method=None):
+    # maybe occur when doc is duplicated
+    if (
+        doc.party_bank_account
+        and not doc.make_bank_online_payment
+        and doc.payment_transfer_method == PAYMENT_METHOD.LINK.value
+    ):
+        doc.payment_transfer_method = PAYMENT_METHOD.NEFT.value
+
     if (
         not doc.make_bank_online_payment
         or not doc.integration_docname
@@ -45,7 +50,7 @@ def validate_transfer_methods(doc: PaymentEntry, method=None):
 
 
 def validate_bank_payment_method(doc: PaymentEntry):
-    if doc.payment_transfer_method not in BANK_METHOD:
+    if doc.payment_transfer_method not in BANK_METHODS:
         return
 
     if not (
