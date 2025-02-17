@@ -12,9 +12,23 @@ from frappe.utils import (
 
 from constants import SECONDS_IN_A_DAY
 
+
+################# PAYMENT UTILS #################
+def is_already_paid(amended_from: str | None = None) -> bool | int:
+    """
+    Check if the Payment Entry is already paid via Bank Online Payment.
+
+    :param amended_from: Original Payment Entry name.
+    """
+    if not amended_from:
+        return False
+
+    return frappe.db.get_value(
+        "Payment Entry", amended_from, "make_bank_online_payment"
+    )
+
+
 ################# APIs RELATED #################
-
-
 def get_start_of_day_epoch(date: DateTimeLikeObject = None) -> int:
     """
     Return the Unix timestamp (seconds since Epoch) for the start of the given `date`.\n
