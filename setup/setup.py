@@ -17,10 +17,12 @@ from setup import (
     make_workflows,
 )
 
+NAME = "Payment Integration Utils"
+
 
 ################### After Install ###################
 def setup_customizations():
-    click.secho("Setting up Payment Integration Utils customizations...", fg="blue")
+    click.secho(f"Setting up {NAME} customizations...", fg="blue")
 
     make_roles_and_permissions(ROLES)
 
@@ -41,7 +43,7 @@ def setup_customizations():
 
 ################### Before Uninstall ###################
 def delete_customizations():
-    click.secho("Deleting Payment Integration Utils customizations...", fg="blue")
+    click.secho(f"Deleting {NAME} customizations...", fg="blue")
 
     delete_custom_fields(CUSTOM_FIELDS)
 
