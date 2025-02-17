@@ -119,10 +119,7 @@ def get_unordered_list(items: list[str]) -> str:
 
 ################# WRAPPERS #################
 def enqueue_integration_request(**kwargs):
-    frappe.enqueue(
-        "payment_integration_utils.payment_integration_utils.utils.log_integration_request",
-        **kwargs,
-    )
+    frappe.enqueue(log_integration_request, **kwargs)
 
 
 def log_integration_request(
