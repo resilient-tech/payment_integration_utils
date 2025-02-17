@@ -31,6 +31,12 @@ frappe.ui.form.on("Payment Entry", {
 		// Do not allow to edit fields if Payment is processed by RazorpayX in amendment
 		await disable_payout_fields_in_amendment(frm);
 
+		// permission checks
+		frm.toggle_display(
+			"online_payment_section",
+			payment_integration_utils.user_has_payment_permissions(frm)
+		);
+
 		// update descriptions
 		frm.get_field("payment_type").set_empty_description();
 		frm.get_field("reference_no").set_empty_description();

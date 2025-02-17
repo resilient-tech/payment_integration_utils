@@ -27,6 +27,14 @@ Object.assign(payment_integration_utils, {
 		);
 	},
 
+	user_has_payment_permissions(frm) {
+		if (frm.doc.__onload) {
+			return this.get_onload(frm, "has_payment_permission");
+		}
+
+		return this.can_user_authorize_payment();
+	},
+
 	set_onload(frm, key, value) {
 		if (!frm.doc.__onload) {
 			frm.doc.__onload = {};
