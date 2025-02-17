@@ -40,6 +40,9 @@ frappe.ui.form.on("Payment Entry", {
 		// update descriptions
 		frm.get_field("payment_type").set_empty_description();
 		frm.get_field("reference_no").set_empty_description();
+
+		// user can make payment `on submit`
+		update_submit_button_label(frm);
 	},
 
 	validate: function (frm) {
@@ -103,6 +106,23 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 });
+
+// ############ HELPERS ############ //
+function update_submit_button_label(frm) {
+	if (
+		!payment_integration_utils.user_has_payment_permissions(frm) ||
+		payment_integration_utils.is_already_paid(frm) ||
+		!frm.doc.make_bank_online_payment ||
+		frm.doc.docstatus !== 0 ||
+		frm.doc.__islocal ||
+		frm.toolbar._has_workflow
+	)
+		return;
+
+	frm.page.set_primary_action(__("Pay and Submit"), () => {
+		frm.savesubmit();
+	});
+}
 
 // ############ UTILITY ############ //
 /**
