@@ -6,13 +6,9 @@ Which are common for all the payments.
 Note: ⚠️ If `Actions` and `States` define elsewhere, then make sure to create them before creating workflows.
 """
 
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.enums import (
-    BaseEnum,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.roles import (
-    DEFAULT_ROLE_PROFILE,
-    ROLE_PROFILE,
-)
+
+from constants.enums import BaseEnum
+from constants.roles import DEFAULT_ROLE_PROFILE, ROLE_PROFILE
 
 
 class WORKFLOW_ACTION(BaseEnum):
