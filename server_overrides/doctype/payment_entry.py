@@ -17,6 +17,10 @@ def onload(doc: PaymentEntry, method=None):
     doc.set_onload("is_already_paid", is_already_paid(doc.amended_from))
 
     doc.set_onload(
+        "payment_integration_fields", frappe.get_hooks("payment_integration_fields")
+    )
+
+    doc.set_onload(
         "has_payment_permission", has_payment_permissions(doc.name, throw=False)
     )
 

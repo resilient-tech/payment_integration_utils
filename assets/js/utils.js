@@ -52,6 +52,10 @@ Object.assign(payment_integration_utils, {
 		return message;
 	},
 
+	is_already_paid(frm) {
+		return this.get_onload(frm, "is_already_paid");
+	},
+
 	validate_payment_transfer_method(method, amount) {
 		if ([PAYMENT_TRANSFER_METHOD.NEFT, PAYMENT_TRANSFER_METHOD.LINK].includes(method)) return;
 
