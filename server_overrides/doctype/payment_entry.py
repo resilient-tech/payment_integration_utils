@@ -7,7 +7,7 @@ from frappe.utils.scheduler import is_scheduler_inactive
 
 from constants.payments import BANK_METHODS
 from constants.payments import TRANSFER_METHOD as PAYMENT_METHOD
-from utils import is_already_paid
+from utils.__init__ import is_already_paid
 from utils.auth import run_before_payment_authentication as has_payment_permissions
 from utils.validation import validate_ifsc_code
 

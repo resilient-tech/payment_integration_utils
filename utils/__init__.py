@@ -10,7 +10,7 @@ from frappe.utils import (
     getdate,
 )
 
-from constants import SECONDS_IN_A_DAY
+from constants.__init__ import SECONDS_IN_A_DAY
 
 
 ################# PAYMENT UTILS #################

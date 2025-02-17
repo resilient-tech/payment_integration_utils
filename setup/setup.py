@@ -7,7 +7,7 @@ from constants.property_setters import PROPERTY_SETTERS
 from constants.roles import ROLES
 from constants.workflows import STATES_COLORS as WORKFLOW_STATES
 from constants.workflows import WORKFLOW_ACTION, WORKFLOWS
-from setup import (
+from setup.__init__ import (
     delete_custom_fields,
     delete_property_setters,
     delete_roles_and_permissions,
