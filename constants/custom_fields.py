@@ -10,13 +10,9 @@ Note:
         ...
 """
 
-from payment_integration_utils.payment_integration_utils.constants.payments import (
-    BANK_METHODS,
-    TRANSFER_METHOD,
-)
-from payment_integration_utils.payment_integration_utils.constants.roles import (
-    PERMISSION_LEVEL,
-)
+
+from constants.payments import BANK_METHODS, TRANSFER_METHOD
+from constants.roles import PERMISSION_LEVEL
 
 UPI_MODE_CONDITION = f"doc.payment_transfer_method === '{TRANSFER_METHOD.UPI.value}'"
 BANK_MODE_CONDITION = f"{BANK_METHODS}.includes(doc.payment_transfer_method)"
