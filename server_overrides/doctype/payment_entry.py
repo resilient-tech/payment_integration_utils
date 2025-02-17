@@ -4,18 +4,11 @@ from frappe import _
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
 from frappe.utils import fmt_money
 from frappe.utils.scheduler import is_scheduler_inactive
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.payments import (
-    BANK_METHODS,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.payments import (
-    TRANSFER_METHOD as PAYMENT_METHOD,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.utils.auth import (
-    run_before_payment_authentication as has_payment_permissions,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.utils.validation import (
-    validate_ifsc_code,
-)
+
+from constants.payments import BANK_METHODS
+from constants.payments import TRANSFER_METHOD as PAYMENT_METHOD
+from utils.auth import run_before_payment_authentication as has_payment_permissions
+from utils.validation import validate_ifsc_code
 
 
 #### DOC EVENTS ####

@@ -32,12 +32,9 @@ from frappe.twofactor import (
 )
 from frappe.utils import cint, fmt_money
 from frappe.utils.password import check_password, decrypt, encrypt
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.enums import (
-    BaseEnum,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.roles import (
-    ROLE_PROFILE,
-)
+
+from constants.enums import BaseEnum
+from constants.roles import ROLE_PROFILE
 
 # ! Important: Do not use `cache.get_value` or `cache.set_value` as it not working as expected. Use `cache.get` and `cache.set` instead.
 
@@ -536,6 +533,10 @@ class Authenticate2FA:
     @staticmethod
     def get_payment_entries(auth_id: str) -> list[str]:
         payment_entries = frappe.cache.get(f"{auth_id}{Utils2FA._PAYMENT_ENTRIES}")
+
+        if not payment_entries:
+            return []
+
         return pickle.loads(b64decode(payment_entries))
 
     def get_auth_opt_secret(self) -> str:

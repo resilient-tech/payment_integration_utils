@@ -1,9 +1,8 @@
 import frappe
 import requests
 from frappe import _
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.payments import (
-    TRANSFER_METHOD as PAYOUT_MODE,
-)
+
+from constants.payments import TRANSFER_METHOD as PAYMENT_MODE
 
 
 def validate_ifsc_code(ifsc_code: str, throw: bool = False) -> bool | None:
@@ -21,16 +20,16 @@ def validate_ifsc_code(ifsc_code: str, throw: bool = False) -> bool | None:
     return response.status_code == 200
 
 
-def validate_payout_mode(payout_mode: str, throw: bool = False) -> bool | None:
-    if PAYOUT_MODE.has_value(payout_mode):
+def validate_payment_mode(payment_mode: str, throw: bool = False) -> bool | None:
+    if PAYMENT_MODE.has_value(payment_mode):
         return True
 
     if throw:
         frappe.throw(
             msg=_(
-                "Invalid Payout Mode: <strong>{0}</strong>. Must be one of: {1}"
-            ).format(payout_mode, PAYOUT_MODE.values_as_html_list()),
-            title=_("Invalid Payout Mode"),
+                "Invalid Payment Mode: <strong>{0}</strong>. Must be one of: {1}"
+            ).format(payment_mode, PAYMENT_MODE.values_as_html_list()),
+            title=_("Invalid Payment Mode"),
         )
 
     return False
