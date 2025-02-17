@@ -2,23 +2,28 @@ import frappe
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from frappe import _
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
-from frappe.utils import fmt_money
+from frappe.utils import fmt_money, get_link_to_form
 from frappe.utils.scheduler import is_scheduler_inactive
 
 from constants.payments import BANK_METHODS
 from constants.payments import TRANSFER_METHOD as PAYMENT_METHOD
+from utils import is_already_paid
 from utils.auth import run_before_payment_authentication as has_payment_permissions
 from utils.validation import validate_ifsc_code
 
 
 #### DOC EVENTS ####
 def onload(doc: PaymentEntry, method=None):
+    doc.set_onload("is_already_paid", is_already_paid(doc.amended_from))
+
     doc.set_onload(
         "has_payment_permission", has_payment_permissions(doc.name, throw=False)
     )
 
 
 def validate(doc: PaymentEntry, method=None):
+    validate_if_already_paid(doc)
+
     # maybe occur when doc is duplicated
     if (
         doc.party_bank_account
@@ -38,6 +43,64 @@ def validate(doc: PaymentEntry, method=None):
 
 
 ### VALIDATION HELPERS ###
+def validate_if_already_paid(doc: PaymentEntry):
+    if not doc.amended_from:
+        return
+
+    payout_fields = [
+        # Common
+        "payment_type",
+        "bank_account",
+        # Party
+        "party",
+        "party_type",
+        "party_name",
+        "party_bank_account",
+        "party_bank_account_no",
+        "party_bank_ifsc",
+        "party_upi_id",
+        "contact_person",
+        "contact_mobile",
+        "contact_email",
+        # Integration
+        "integration_doctype",
+        "integration_docname",
+        # Payment
+        "paid_amount",
+        "make_bank_online_payment",
+        "payment_transfer_method",
+        "reference_no",
+        *frappe.get_hooks("payment_integration_fields"),
+    ]
+
+    original_doc = frappe.db.get_value(
+        "Payment Entry",
+        doc.amended_from,
+        payout_fields,
+        as_dict=True,
+    )
+
+    if not original_doc or not original_doc.make_bank_online_payment:
+        return
+
+    for field in payout_fields:
+        if doc.get(field) != original_doc.get(field):
+            msg = _("Field <strong>{0}</strong> cannot be changed.<br><br>").format(
+                doc.meta.get_label(field)
+            )
+            msg += _(
+                "The source Payment Entry <strong>{0}</strong> is already processed via online payment integration.<br>"
+            ).format(get_link_to_form("Payment Entry", doc.amended_from))
+
+            frappe.throw(
+                title=_("Payment Details Cannot Be Changed"),
+                msg=msg,
+            )
+
+    # used in next actions and validations
+    doc.flags._is_already_paid = True
+
+
 def validate_transfer_methods(doc: PaymentEntry, method=None):
     validate_bank_payment_method(doc)
     validate_upi_payment_method(doc)
