@@ -1,23 +1,13 @@
 import click
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.custom_fields import (
-    CUSTOM_FIELDS,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.property_setters import (
-    PROPERTY_SETTERS,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.roles import (
-    ROLES,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.workflows import (
-    STATES_COLORS as WORKFLOW_STATES,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.constants.workflows import (
-    WORKFLOW_ACTION,
-    WORKFLOWS,
-)
-from payment_integration_utils_mode_co.payment_integration_utils_mod.utils import (
+
+from constants.custom_fields import CUSTOM_FIELDS
+from constants.property_setters import PROPERTY_SETTERS
+from constants.roles import ROLES
+from constants.workflows import STATES_COLORS as WORKFLOW_STATES
+from constants.workflows import WORKFLOW_ACTION, WORKFLOWS
+from setup import (
     delete_custom_fields,
     delete_property_setters,
     delete_roles_and_permissions,
@@ -30,17 +20,14 @@ from payment_integration_utils_mode_co.payment_integration_utils_mod.utils impor
 
 ################### After Install ###################
 def setup_customizations():
-    click.secho("Creating Roles and Permissions...", fg="blue")
+    click.secho("Setting up Payment Integration Utils customizations...", fg="blue")
+
     make_roles_and_permissions(ROLES)
 
-    click.secho("Creating Custom Fields...", fg="blue")
     create_custom_fields(CUSTOM_FIELDS)
 
-    click.secho("Creating Property Setters...", fg="blue")
     for property_setter in PROPERTY_SETTERS:
         frappe.make_property_setter(property_setter)
-
-    click.secho("Creating Workflows...", fg="blue")
 
     # create states
     make_workflow_states(WORKFLOW_STATES)
@@ -54,11 +41,10 @@ def setup_customizations():
 
 ################### Before Uninstall ###################
 def delete_customizations():
-    click.secho("Deleting Custom Fields...", fg="blue")
+    click.secho("Deleting Payment Integration Utils customizations...", fg="blue")
+
     delete_custom_fields(CUSTOM_FIELDS)
 
-    click.secho("Deleting Property Setters...", fg="blue")
     delete_property_setters(PROPERTY_SETTERS)
 
-    click.secho("Deleting Roles and Permissions...", fg="blue")
     delete_roles_and_permissions(ROLES)
