@@ -1,7 +1,10 @@
 import frappe
 import requests
-from constants.payments import TRANSFER_METHOD as PAYMENT_MODE
 from frappe import _
+
+from payment_integration_utils.payment_integration_utils.constants.payments import (
+    TRANSFER_METHOD as PAYMENT_MODE,
+)
 
 
 def validate_ifsc_code(ifsc_code: str, throw: bool = False) -> bool | None:

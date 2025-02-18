@@ -1,6 +1,6 @@
 from frappe.permissions import ADMIN_ROLE, ALL_USER_ROLE
 
-from constants.enums import BaseEnum
+from payment_integration_utils.payment_integration_utils.constants.enums import BaseEnum
 
 
 class ROLE_PROFILE(BaseEnum):
