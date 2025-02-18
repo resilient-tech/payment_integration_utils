@@ -4,7 +4,7 @@ app_publisher = "Resilient Tech"
 app_description = "Base for integrate online payment integrations"
 app_email = "info@resilient.tech"
 app_license = "GNU General Public License (v3)"
-# required_apps = ["frappe/erpnext"]
+required_apps = ["frappe/erpnext"]
 
 after_install = "payment_integration_utils.install.after_install"
 before_uninstall = "payment_integration_utils.uninstall.before_uninstall"
