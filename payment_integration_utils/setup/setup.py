@@ -1,12 +1,11 @@
 import click
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-
 from constants.custom_fields import CUSTOM_FIELDS
 from constants.property_setters import PROPERTY_SETTERS
 from constants.roles import ROLES
 from constants.workflows import STATES_COLORS as WORKFLOW_STATES
 from constants.workflows import WORKFLOW_ACTION, WORKFLOWS
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from setup.__init__ import (
     delete_custom_fields,
     delete_property_setters,

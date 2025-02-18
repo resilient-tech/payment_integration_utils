@@ -1,7 +1,6 @@
 import frappe
-from frappe import _
-
 from constants.roles import ROLE_PROFILE
+from frappe import _
 
 
 def has_payment_permissions(payment_entries: str | list[str], throw: bool = False):

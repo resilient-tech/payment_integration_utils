@@ -1,12 +1,11 @@
 import frappe
+from constants.payments import BANK_METHODS
+from constants.payments import TRANSFER_METHOD as PAYMENT_METHOD
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from frappe import _
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
 from frappe.utils import fmt_money, get_link_to_form
 from frappe.utils.scheduler import is_scheduler_inactive
-
-from constants.payments import BANK_METHODS
-from constants.payments import TRANSFER_METHOD as PAYMENT_METHOD
 from utils.__init__ import is_already_paid
 from utils.auth import run_before_payment_authentication as has_payment_permissions
 from utils.validation import validate_ifsc_code

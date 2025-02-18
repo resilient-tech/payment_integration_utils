@@ -20,6 +20,8 @@ import frappe
 import frappe.defaults
 import frappe.permissions
 import pyotp
+from constants.enums import BaseEnum
+from constants.roles import ROLE_PROFILE
 from frappe import _, enqueue, get_system_settings
 from frappe.auth import get_login_attempt_tracker
 from frappe.twofactor import (
@@ -32,9 +34,6 @@ from frappe.twofactor import (
 )
 from frappe.utils import cint, fmt_money
 from frappe.utils.password import check_password, decrypt, encrypt
-
-from constants.enums import BaseEnum
-from constants.roles import ROLE_PROFILE
 
 # ! Important: Do not use `cache.get_value` or `cache.set_value` as it not working as expected. Use `cache.get` and `cache.set` instead.
 

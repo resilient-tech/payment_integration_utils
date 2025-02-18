@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 import frappe
+from constants.__init__ import SECONDS_IN_A_DAY
 from frappe import _
 from frappe.utils import (
     DateTimeLikeObject,
@@ -9,8 +10,6 @@ from frappe.utils import (
     get_timestamp,
     getdate,
 )
-
-from constants.__init__ import SECONDS_IN_A_DAY
 
 
 ################# PAYMENT UTILS #################
