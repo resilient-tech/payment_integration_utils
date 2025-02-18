@@ -84,6 +84,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	party: async function (frm) {
 		if (frm.doc.contact_mobile) frm.set_value("contact_mobile", "");
+		if (frm.doc.party_bank_account) frm.set_value("party_bank_account", "");
 
 		if (frm.doc.party_type !== "Employee" || !frm.doc.party) return;
 

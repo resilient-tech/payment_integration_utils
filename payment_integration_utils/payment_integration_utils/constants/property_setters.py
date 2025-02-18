@@ -1,4 +1,7 @@
-from constants.payments import BANK_ACCOUNT_REQD_METHODS, TRANSFER_METHOD
+from payment_integration_utils.payment_integration_utils.constants.payments import (
+    BANK_ACCOUNT_REQD_METHODS,
+    TRANSFER_METHOD,
+)
 
 PROPERTY_SETTERS = [
     ### Payment Entry ###

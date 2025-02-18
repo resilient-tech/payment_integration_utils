@@ -1,4 +1,4 @@
-from constants.enums import BaseEnum
+from payment_integration_utils.payment_integration_utils.constants.enums import BaseEnum
 
 
 class TRANSFER_METHOD(BaseEnum):

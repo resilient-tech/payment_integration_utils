@@ -33,8 +33,10 @@ from frappe.twofactor import (
 from frappe.utils import cint, fmt_money
 from frappe.utils.password import check_password, decrypt, encrypt
 
-from constants.enums import BaseEnum
-from constants.roles import ROLE_PROFILE
+from payment_integration_utils.payment_integration_utils.constants.enums import BaseEnum
+from payment_integration_utils.payment_integration_utils.constants.roles import (
+    ROLE_PROFILE,
+)
 
 # ! Important: Do not use `cache.get_value` or `cache.set_value` as it not working as expected. Use `cache.get` and `cache.set` instead.
 
