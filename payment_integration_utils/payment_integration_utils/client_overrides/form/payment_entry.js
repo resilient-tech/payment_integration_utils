@@ -78,7 +78,11 @@ frappe.ui.form.on("Payment Entry", {
 
 	bank_account: function (frm) {
 		if (!frm.doc.bank_account) {
-			frm.set_value("make_bank_online_payment", 0);
+			frm.set_value({
+				make_bank_online_payment: 0,
+				integration_doctype: "",
+				integration_docname: "",
+			});
 		}
 	},
 
