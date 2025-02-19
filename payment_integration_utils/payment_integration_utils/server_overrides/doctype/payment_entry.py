@@ -36,6 +36,12 @@ def onload(doc: PaymentEntry, method=None):
 def validate(doc: PaymentEntry, method=None):
     validate_if_already_paid(doc)
 
+    # to make payment online, bank account is mandatory
+    if not doc.bank_account:
+        doc.integration_doctype = ""
+        doc.integration_docname = ""
+        doc.make_bank_online_payment = 0
+
     # maybe occur when doc is duplicated
     if (
         doc.party_bank_account
