@@ -1,6 +1,10 @@
 from frappe.tests.utils import FrappeTestCase
 
-from payment_integration_utils.payment_integration_utils.utils import *
+from payment_integration_utils.payment_integration_utils.utils import (
+    paisa_to_rupees,
+    rupees_to_paisa,
+    to_hyphenated,
+)
 
 
 class TestUtils(FrappeTestCase):
