@@ -17,3 +17,7 @@ class TestUtils(FrappeTestCase):
         for rupees, paisa in data:
             self.assertEqual(rupees_to_paisa(rupees), paisa)
             self.assertEqual(paisa_to_rupees(paisa), rupees)
+
+    def test_to_hyphenated(self):
+        self.assertEqual(to_hyphenated("Hello World"), "Hello-World")
+        self.assertEqual(to_hyphenated("Hello World!"), "Hello-World-")
