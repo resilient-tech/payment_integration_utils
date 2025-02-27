@@ -1,6 +1,8 @@
 import click
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.custom_field.custom_field import (
+    create_custom_fields as make_custom_fields,
+)
 
 from payment_integration_utils.payment_integration_utils.constants.custom_fields import (
     CUSTOM_FIELDS,
@@ -30,17 +32,33 @@ from payment_integration_utils.payment_integration_utils.setup import (
 ################### After Install ###################
 def setup_customizations():
     click.secho("Creating Roles and Permissions...", fg="blue")
-    make_roles_and_permissions(ROLES)
+    create_roles_and_permissions()
 
     click.secho("Creating Custom Fields...", fg="blue")
-    create_custom_fields(CUSTOM_FIELDS)
+    create_custom_fields()
 
     click.secho("Creating Property Setters...", fg="blue")
+    create_property_setters()
+
+    click.secho("Creating Workflows...", fg="blue")
+    create_workflows()
+
+
+# Note: separate functions are required to use in patches
+def create_roles_and_permissions():
+    make_roles_and_permissions(ROLES)
+
+
+def create_custom_fields():
+    make_custom_fields(CUSTOM_FIELDS)
+
+
+def create_property_setters():
     for property_setter in PROPERTY_SETTERS:
         frappe.make_property_setter(property_setter)
 
-    click.secho("Creating Workflows...", fg="blue")
 
+def create_workflows():
     # create states
     make_workflow_states(WORKFLOW_STATES)
 
