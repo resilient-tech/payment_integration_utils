@@ -10,7 +10,6 @@ Note:
         ...
 """
 
-
 from payment_integration_utils.payment_integration_utils.constants.payments import (
     BANK_METHODS,
     TRANSFER_METHOD,
@@ -18,6 +17,7 @@ from payment_integration_utils.payment_integration_utils.constants.payments impo
 from payment_integration_utils.payment_integration_utils.constants.roles import (
     PERMISSION_LEVEL,
 )
+from payment_integration_utils.payment_integration_utils.utils.auth import AUTH_METHOD
 
 UPI_MODE_CONDITION = f"doc.payment_transfer_method === '{TRANSFER_METHOD.UPI.value}'"
 BANK_MODE_CONDITION = f"{BANK_METHODS}.includes(doc.payment_transfer_method)"
@@ -174,6 +174,36 @@ CUSTOM_FIELDS = {
             "hidden": 1,
             "no_copy": 1,
             "permlevel": PERMISSION_LEVEL.SEVEN.value,
+        },
+    ],
+    "System Settings": [
+        {
+            "fieldname": "payment_integration",
+            "label": "Payment Integration",
+            "fieldtype": "Section Break",
+            "insert_after": "otp_issuer_name",
+        },
+        # TODO: add Email/SMS after bug fix
+        {
+            "fieldname": "payment_authentication_method",
+            "label": "Payment Authentication Method",
+            "fieldtype": "Select",
+            "insert_after": "payment_integration",
+            "options": AUTH_METHOD.OTP_APP.value,
+            "default": AUTH_METHOD.OTP_APP.value,
+            "reqd": 1,
+            "read_only": 1,
+        },
+        {
+            "fieldname": "cb_payment_integration",
+            "fieldtype": "Column Break",
+            "insert_after": "payment_authentication_method",
+        },
+        {
+            "fieldname": "payment_otp_issuer_name",
+            "label": "OTP Issuer Name",
+            "fieldtype": "Data",
+            "insert_after": "cb_payment_integration",
         },
     ],
 }
