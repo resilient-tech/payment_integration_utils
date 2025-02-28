@@ -186,6 +186,10 @@ class Utils2FA:
     _AUTHENTICATED = "_authenticated"
     _PAYMENT_ENTRIES = "_payment_entries"
 
+    #### Constants ####
+    # TODO: temporary hardcoding! Need from length of PEs
+    EXPIRY_TIME = 1500  # 1500 sec -> 25 minutes
+
     #### Getters and Setters ####
     @staticmethod
     def get_otp_issuer() -> str:
@@ -244,7 +248,7 @@ class Utils2FA:
 
     @staticmethod
     def get_email_body_for_2fa(
-        otp: str, paid_amount: int | float, payment_entries: str, **kwargs
+        otp: str, paid_amount: int | float, payment_entries: str, expires_in: int = 5
     ):
         body = """
         <p>Enter the verification code below to authenticate the payment of <strong>{{ paid_amount }}</strong></p>
@@ -254,10 +258,8 @@ class Utils2FA:
         <br>
         <p><strong>Payment Entries to Authenticate: </strong>{{ payment_entries }}</p>
         <br>
-        <p><strong>Note:</strong> This code expires in 5 minutes.</p>
+        <p><strong>Note:</strong> This code expires in {{ expires_in }} minutes.</p>
         """
-
-        # TODO: need to change expiry time? 180 sec -> 3 mins
 
         return frappe.render_template(
             body,
@@ -265,6 +267,7 @@ class Utils2FA:
                 "otp": otp,
                 "paid_amount": fmt_money(paid_amount, currency="INR"),
                 "payment_entries": payment_entries,
+                "expires_in": expires_in,
             },
         )
 
@@ -330,8 +333,6 @@ class Trigger2FA:
         # else:
         #     expiry_time = 180
 
-        # ! TODO: Set expiry time depending on the length of PE
-        # TODO: ? It should be instance variable
         expiry_time = 180
 
         for k, v in kwargs.items():
@@ -339,7 +340,8 @@ class Trigger2FA:
                 v = b64encode(pickle.dumps(v)).decode("utf-8")
 
             # for payment_entries, set expiry time to 100 seconds more
-            expiry_time = expiry_time + 100 if k == "payment_entries" else expiry_time
+            if k == "payment_entries":
+                expiry_time = Utils2FA.EXPIRY_TIME
 
             self.pipeline.set(f"{self.auth_id}_{k}", v, expiry_time)
 
@@ -517,8 +519,9 @@ class Authenticate2FA:
 
     def on_success(self) -> dict:
         self.tracker.add_success_attempt()
-        # TODO: need to change expiry time?
-        frappe.cache.set(f"{self.auth_id}{Utils2FA._AUTHENTICATED}", "True", 180)
+        frappe.cache.set(
+            f"{self.auth_id}{Utils2FA._AUTHENTICATED}", "True", Utils2FA.EXPIRY_TIME
+        )
         return {"verified": True}
 
     def on_failure(self, message) -> dict:
