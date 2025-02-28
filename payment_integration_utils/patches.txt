@@ -4,5 +4,6 @@
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
-execute:from payment_integration_utils.setup import create_custom_fields; create_custom_fields()
+execute:from payment_integration_utils.setup import create_custom_fields; create_custom_fields() #1
 payment_integration_utils.patches.delete_old_custom_fields
+payment_integration_utils.patches.update_system_settings
