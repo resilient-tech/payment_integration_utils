@@ -3,12 +3,7 @@ from datetime import datetime
 
 import frappe
 from frappe import _
-from frappe.utils import (
-    DateTimeLikeObject,
-    add_to_date,
-    get_timestamp,
-    getdate,
-)
+from frappe.utils import DateTimeLikeObject, add_to_date, flt, get_timestamp, getdate
 
 from payment_integration_utils.constants import SECONDS_IN_A_DAY
 
@@ -89,13 +84,15 @@ def rupees_to_paisa(amount: float | int) -> int:
     Convert the given amount in Rupees to Paisa.
 
     :param amount: The amount in Rupees to be converted to Paisa.
-
     Example:
     ```
     rupees_to_paisa(100) ==> 10000
+    rupees_to_paisa(79.899) ==> 7990
+    rupees_to_paisa(79.9) ==> 7990
+
     ```
     """
-    return int(amount * 100)
+    return int(flt(amount, 2) * 100)
 
 
 def paisa_to_rupees(amount: int) -> int | float:
@@ -107,9 +104,10 @@ def paisa_to_rupees(amount: int) -> int | float:
     Example:
     ```
     paisa_to_rupees(10000) ==> 100
+    paisa_to_rupees(7990) ==> 79.9
     ```
     """
-    return amount / 100
+    return flt(amount / 100, 2)
 
 
 ################# HTML RELATED #################
