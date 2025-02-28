@@ -103,7 +103,6 @@ def verify_otp(otp: str, auth_id: str) -> dict:
     return Authenticate2FA(otp, auth_id).verify()
 
 
-# TODO: How To Handle This? (Also need changes in JS)
 @frappe.whitelist()
 def reset_otp_secret(user: str):
     """
@@ -117,12 +116,12 @@ def reset_otp_secret(user: str):
     if ROLE_PROFILE.PAYMENT_AUTHORIZER.value not in frappe.get_roles():
         frappe.throw(_("You do not have permission to reset OTP Secret."))
 
-    settings = frappe.get_cached_doc("System Settings")
-
-    if not settings.enable_two_factor_auth:
+    if Utils2FA.get_authentication_method() != AUTH_METHOD.OTP_APP.value:
         frappe.throw(
-            _("You have to enable Two Factor Auth from System Settings."),
-            title=_("Enable Two Factor Auth"),
+            msg=_(
+                "OTP App is not enabled for Payment Authentication. Contact System Administrator."
+            ),
+            title=_("OTP App Not Enabled"),
         )
 
     otp_issuer = Utils2FA.get_otp_issuer()
@@ -134,7 +133,7 @@ def reset_otp_secret(user: str):
     email_args = {
         "recipients": user_email,
         "sender": None,
-        "subject": _("Payment OTP Secret Reset - {0}").format(otp_issuer),
+        "subject": _("Payment OTP Secret Reset for {0}").format(otp_issuer),
         "message": _(
             "<p>Your payment OTP secret on <strong>{0}</strong> used for authorizing <strong>Bank Payments</strong> has been reset! <br><br> If you did not perform this reset and did not request it, please contact your <strong>System Administrator</strong> immediately!!</p>"
         ).format(otp_issuer),

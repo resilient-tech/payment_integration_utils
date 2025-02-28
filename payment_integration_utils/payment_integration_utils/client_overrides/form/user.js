@@ -5,7 +5,7 @@ frappe.ui.form.on("User", {
 	refresh: function (frm) {
 		if (
 			!is_2fa_otp_app_enabled() ||
-			!frappe.user.has_role(payment_integration_utils.PAYOUT_AUTHORIZER) ||
+			!frappe.user.has_role(payment_integration_utils.PAYMENT_AUTHORIZER) ||
 			frappe.session.user != frm.doc.name
 		) {
 			return;
@@ -28,7 +28,7 @@ frappe.ui.form.on("User", {
 
 function is_2fa_otp_app_enabled() {
 	return (
-		cint(frappe.boot.sysdefaults.enable_two_factor_auth) &&
-		frappe.boot.sysdefaults.two_factor_method === payment_integration_utils.AUTH_METHODS.OTP_APP
+		frappe.boot.sysdefaults.payment_authentication_method ===
+		payment_integration_utils.AUTH_METHODS.OTP_APP
 	);
 }
