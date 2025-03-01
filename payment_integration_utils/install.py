@@ -5,7 +5,7 @@ from payment_integration_utils.constants import BUG_REPORT_URL
 from payment_integration_utils.hooks import app_title as APP_NAME
 from payment_integration_utils.setup import setup_customizations
 
-POST_INSTALL_PATCHES = []
+POST_INSTALL_PATCHES = ["update_system_settings"]
 
 
 def after_install():
