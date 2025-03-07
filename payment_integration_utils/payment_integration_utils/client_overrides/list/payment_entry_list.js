@@ -30,8 +30,7 @@ frappe.listview_settings["Payment Entry"] = {
 					message += "<br>";
 					message += get_ineligible_docs_html(
 						ineligible_docs,
-						__("View Ineligible Docs ({0})", [ineligible_docs.length]),
-						false
+						__("View Ineligible Docs ({0})", [ineligible_docs.length])
 					);
 				}
 
@@ -71,10 +70,21 @@ function show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_d
 		primary_action_label: __("Confirm"),
 		fields: [
 			{
+				fieldname: "eligible_doc_count_html",
+				fieldtype: "HTML",
+				options: `<p>✅ ${__("Marked for online payment: {0}", [marked_docs.length])} </p>`,
+				depends_on: `eval: ${marked_docs.length} && (${unmarked_docs.length} || ${ineligible_docs.length})`,
+			},
+			{
 				fieldname: "eligible_doc_html",
 				fieldtype: "HTML",
 				options: __("Pay and Submit {0} Documents?", [marked_docs.length]),
 				depends_on: `eval: ${marked_docs.length} && ${!unmarked_docs.length}`,
+			},
+			{
+				fieldtype: "Section Break",
+				fieldname: "sec_unmarked_docs",
+				depends_on: `eval: ${unmarked_docs.length}`,
 			},
 			{
 				fieldname: "unmarked_doc_html",
@@ -88,9 +98,14 @@ function show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_d
 				fieldtype: "Check",
 				default: unmarked_docs.length ? 1 : 0,
 				depends_on: `eval: ${unmarked_docs.length}`,
-				description: `<p class='text-warning font-weight-bold'>
-								${__("If unchecked, above docs will be skipped!")}
+				description: `<p class='text-info font-weight-bold'>
+								${__("Note: If unchecked, Unmarked docs will be skipped!")}
 							</p>`,
+			},
+			{
+				fieldtype: "Section Break",
+				fieldname: "sec_ineligible_docs",
+				depends_on: `eval: ${ineligible_docs.length}`,
 			},
 			{
 				fieldname: "ineligible_doc_html",
@@ -141,13 +156,13 @@ function get_unmarked_docs_html(docs) {
 	return `<details open>
 				<summary>${__("Not marked for online payment ({0})", [docs.length])}</summary>
 				<ol>${docs.map((doc) => `<li>${get_formlink(doc)}</li>`).join("")}</ol>
-			</details><br>`;
+			</details>`;
 }
 
-function get_ineligible_docs_html(docs, summary, open = true) {
+function get_ineligible_docs_html(docs, summary, open = false) {
 	if (!docs.length) return "";
 
-	return `<br><details ${open ? "open" : ""}>
+	return `<details ${open ? "open" : ""}>
 				<summary>${summary}</summary>
 				<ol>${docs.map((doc) => `<li>${get_formlink(doc.name)}: ${doc.reason}</li>`).join("")}</ol>
 			</details>`;
