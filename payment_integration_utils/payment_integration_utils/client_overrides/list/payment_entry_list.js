@@ -2,7 +2,15 @@
 // For license information, please see license.txt
 
 frappe.listview_settings["Payment Entry"] = {
-	add_fields: ["make_bank_online_payment", "integration_docname", "integration_doctype"],
+	add_fields: [
+		"make_bank_online_payment",
+		"payment_transfer_method",
+		"integration_docname",
+		"integration_doctype",
+		"party_bank_account",
+		"contact_mobile",
+		"contact_email",
+	],
 
 	onload: function (list_view) {
 		// Add `Pay and Submit` button to the Payment Entry list view
@@ -45,22 +53,41 @@ frappe.listview_settings["Payment Entry"] = {
 
 // #### Utils #### //
 function can_make_payment(doc) {
-	return (
-		doc.integration_doctype &&
-		doc.integration_docname &&
-		doc.docstatus === 0 &&
-		doc.payment_type === "Pay"
-	);
+	if (
+		!doc.integration_docname ||
+		!doc.integration_doctype ||
+		doc.docstatus !== 0 ||
+		doc.payment_type !== "Pay"
+	)
+		return false;
+
+	// Payment with Link requires contact details
+	// Payment with NEFT | IMPS | RTGS | UPI  requires party bank account
+	if (is_link_details_missing(doc) || is_party_bank_account_missing(doc)) return false;
+
+	return true;
 }
 
 function get_ineligibility_reason(doc) {
-	if (!doc.integration_doctype || !doc.integration_docname) {
-		return __("Integration missing");
-	} else if (doc.docstatus !== 0) {
-		return __("Not Submittable");
-	} else if (doc.payment_type !== "Pay") {
-		return __("Not Payable");
-	}
+	if (!doc.integration_doctype || !doc.integration_docname) return __("Integration missing");
+
+	if (doc.docstatus !== 0) return __("Not Submittable");
+
+	if (doc.payment_type !== "Pay") return __("Not Payable");
+
+	if (is_link_details_missing(doc)) return __("Contact Details Missing");
+
+	if (is_party_bank_account_missing(doc)) return __("Party's Bank Account Missing");
+
+	return __("Unknown Reason");
+}
+
+function is_link_details_missing(doc) {
+	return doc.payment_transfer_method === "Link" && !doc.contact_mobile && !doc.contact_email;
+}
+
+function is_party_bank_account_missing(doc) {
+	return doc.payment_transfer_method !== "Link" && !doc.party_bank_account;
 }
 
 // #### Dialog #### //
