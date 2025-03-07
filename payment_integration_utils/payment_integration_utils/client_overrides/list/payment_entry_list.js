@@ -146,8 +146,8 @@ function show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_d
 
 	dialog.show();
 }
-function get_formlink(doc) {
-	return `<a target="_blank" href="${frappe.utils.get_form_link("Payment Entry", doc)}">${doc}</a>`;
+function get_formlink(docname) {
+	return `<a target="_blank" href="${frappe.utils.get_form_link("Payment Entry", docname)}">${docname}</a>`;
 }
 
 function get_unmarked_docs_html(docs) {
