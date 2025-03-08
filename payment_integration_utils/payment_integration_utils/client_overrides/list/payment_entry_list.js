@@ -100,7 +100,7 @@ function show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_d
 				fieldname: "eligible_doc_count_html",
 				fieldtype: "HTML",
 				options: `<p>✅ ${__("Marked for online payment: {0}", [marked_docs.length])} </p>`,
-				depends_on: `eval: ${marked_docs.length} && (${unmarked_docs.length} || ${ineligible_docs.length})`,
+				depends_on: `eval: ${marked_docs.length} && ${unmarked_docs.length}`,
 			},
 			{
 				fieldname: "eligible_doc_html",
