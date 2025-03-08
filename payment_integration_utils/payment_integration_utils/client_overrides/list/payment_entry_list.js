@@ -87,7 +87,7 @@ function is_link_details_missing(doc) {
 }
 
 function is_party_bank_account_missing(doc) {
-	return doc.payment_transfer_method !== "Link" && !doc.party_bank_account;
+	return ["NEFT", "IMPS", "RTGS", "UPI"].includes(doc.payment_transfer_method) && !doc.party_bank_account;
 }
 
 // #### Dialog #### //
