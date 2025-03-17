@@ -235,6 +235,38 @@ def validate_link_payment_method(doc: PaymentEntry):
         )
 
 
+def set_party_bank_details(doc: PaymentEntry):
+    """
+    Set (`db_set`) Party's (Except `Employee`) Bank Account Details:
+    - Bank Account No.
+    - IFSC Code
+    - UPI ID
+
+    based on the Party's Bank Account and `Payment Transfer Method`.
+    """
+    if (
+        doc.party_type == "Employee"
+        or doc.payment_transfer_method == PAYMENT_METHOD.LINK.value
+    ):
+        return
+
+    bank_details = frappe.get_value(
+        "Bank Account",
+        {"name": doc.party_bank_account, "is_company_account": 0},
+        [
+            "bank_account_no as party_bank_account_no",
+            "branch_code as party_bank_ifsc",
+            "upi_id as party_upi_id",
+        ],
+        as_dict=True,
+    )
+
+    if not bank_details:
+        return
+
+    doc.db_set(bank_details)
+
+
 def get_party_contact_details(doc: PaymentEntry) -> dict | None:
     """
     Get Party's contact details as Payment Entry's contact fields.
