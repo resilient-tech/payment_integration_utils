@@ -17,6 +17,7 @@ from payment_integration_utils.payment_integration_utils.utils.auth import (
 )
 from payment_integration_utils.payment_integration_utils.utils.validation import (
     validate_ifsc_code,
+    validate_payment_mode,
 )
 
 
@@ -57,7 +58,7 @@ def validate(doc: PaymentEntry, method=None):
     ):
         return
 
-    validate_transfer_methods(doc, method)
+    validate_transfer_methods(doc)
 
 
 ### VALIDATION HELPERS ###
@@ -119,7 +120,9 @@ def validate_if_already_paid(doc: PaymentEntry):
     doc.flags._is_already_paid = True
 
 
-def validate_transfer_methods(doc: PaymentEntry, method=None):
+def validate_transfer_methods(doc: PaymentEntry):
+    validate_payment_mode(doc.payment_transfer_method, throw=True)
+
     validate_bank_payment_method(doc)
     validate_upi_payment_method(doc)
     validate_link_payment_method(doc)
