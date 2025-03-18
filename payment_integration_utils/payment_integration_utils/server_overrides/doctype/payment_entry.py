@@ -244,10 +244,7 @@ def set_party_bank_details(doc: PaymentEntry):
 
     based on the Party's Bank Account and `Payment Transfer Method`.
     """
-    if (
-        doc.party_type == "Employee"
-        or doc.payment_transfer_method == PAYMENT_METHOD.LINK.value
-    ):
+    if not doc.party_bank_account:
         return
 
     bank_details = frappe.get_value(
