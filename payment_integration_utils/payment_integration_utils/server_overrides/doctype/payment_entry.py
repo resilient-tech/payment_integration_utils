@@ -195,6 +195,10 @@ def validate_link_payment_method(doc: PaymentEntry):
             exc=frappe.MandatoryError,
         )
 
+    # If details are already set, then skip
+    if doc.flags.__party_contact_details_set:
+        return
+
     # get contact details of party
     contact_details = get_party_contact_details(doc)
     party_mobile = contact_details["contact_mobile"]
@@ -262,6 +266,23 @@ def set_party_bank_details(doc: PaymentEntry):
         return
 
     doc.db_set(bank_details)
+
+
+def set_party_contact_details(doc: PaymentEntry):
+    """
+    Set (`db_set`) Party's Contact Details:
+    - Mobile Number
+    - Email ID
+
+    based on the Party's Contact Person and Party Type.
+    """
+    contact_details = get_party_contact_details(doc)
+
+    if not contact_details:
+        return
+
+    doc.flags.__party_contact_details_set = True
+    doc.db_set(contact_details)
 
 
 def get_party_contact_details(doc: PaymentEntry) -> dict | None:
