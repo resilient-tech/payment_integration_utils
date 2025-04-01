@@ -193,8 +193,10 @@ class Utils2FA:
     _PAYMENT_ENTRIES = "_payment_entries"
 
     #### Constants ####
+    OTP_EXPIRY_TIME = 180  # 180 sec -> 3 minutes
+
     # TODO: temporary hardcoding! Need from length of PEs
-    EXPIRY_TIME = 1500  # 1500 sec -> 25 minutes
+    AUTH_EXPIRY_TIME = 1500  # 1500 sec -> 25 minutes
 
     #### Getters and Setters ####
     @staticmethod
@@ -339,17 +341,18 @@ class Trigger2FA:
         # else:
         #     expiry_time = 180
 
-        expiry_time = 180
+        def get_expiry_time(key: str) -> int:
+            return (
+                Utils2FA.AUTH_EXPIRY_TIME
+                if key == "payment_entries"
+                else Utils2FA.OTP_EXPIRY_TIME
+            )
 
         for k, v in kwargs.items():
             if not isinstance(v, str | int | float):
                 v = b64encode(pickle.dumps(v)).decode("utf-8")
 
-            # for payment_entries, set expiry time to 100 seconds more
-            if k == "payment_entries":
-                expiry_time = Utils2FA.EXPIRY_TIME
-
-            self.pipeline.set(f"{self.auth_id}_{k}", v, expiry_time)
+            self.pipeline.set(f"{self.auth_id}_{k}", v, get_expiry_time(k))
 
     #### 2FA Methods ####
     def process_2fa_for_otp_app(self):
@@ -526,7 +529,9 @@ class Authenticate2FA:
     def on_success(self) -> dict:
         self.tracker.add_success_attempt()
         frappe.cache.set(
-            f"{self.auth_id}{Utils2FA._AUTHENTICATED}", "True", Utils2FA.EXPIRY_TIME
+            f"{self.auth_id}{Utils2FA._AUTHENTICATED}",
+            "True",
+            Utils2FA.AUTH_EXPIRY_TIME,
         )
         return {"verified": True}
 
