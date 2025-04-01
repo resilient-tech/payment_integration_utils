@@ -456,7 +456,9 @@ class Authenticate2FA:
 
     def verify(self) -> dict:
         if not (_user := frappe.cache.get(f"{self.auth_id}{Utils2FA._USER}")):
-            return self.on_failure(_("Session expired. Please try again."))
+            return self.on_failure(
+                _("Payment Authentication session expired. Please try again.")
+            )
 
         if self.user != _user.decode("utf-8"):
             raise frappe.PermissionError(_("Invalid user Authentication ID"))
