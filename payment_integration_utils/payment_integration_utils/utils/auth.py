@@ -456,10 +456,10 @@ class Authenticate2FA:
 
     def verify(self) -> dict:
         if not (_user := frappe.cache.get(f"{self.auth_id}{Utils2FA._USER}")):
-            raise frappe.AuthenticationError(_("Invalid Authentication ID"))
+            return self.on_failure(_("Session expired. Please try again."))
 
         if self.user != _user.decode("utf-8"):
-            raise frappe.AuthenticationError(_("Invalid user Authentication ID"))
+            raise frappe.PermissionError(_("Invalid user Authentication ID"))
 
         self.auth_method = Utils2FA.get_authentication_method()
 
