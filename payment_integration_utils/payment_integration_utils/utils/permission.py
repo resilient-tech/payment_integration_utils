@@ -45,10 +45,13 @@ def has_payment_permissions(
 
         return False
 
-    authorizer_role = has_payment_authorizer_role(throw=throw)
-    permission = has_payment_entry_permission(payment_entries, throw=throw)
+    if not has_payment_authorizer_role(throw=throw):
+        return False
 
-    return bool(authorizer_role and permission)
+    if not has_payment_entry_permission(payment_entries, throw=throw):
+        return False
+
+    return True
 
 
 def has_payment_authorizer_role(*, throw=False) -> bool | None:
