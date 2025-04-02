@@ -43,13 +43,6 @@ Object.assign(payment_integration_utils, {
 			title: __("Enter OTP"),
 			fields: [
 				{
-					fieldname: "info",
-					fieldtype: "HTML",
-					options: `<div class="alert alert-warning" role="alert">
-            					${__("Do not close this dialog until you authenticate.")}
-        					</div> <br>`,
-				},
-				{
 					fieldname: "otp",
 					label: __("OTP"),
 					fieldtype: "Data",
