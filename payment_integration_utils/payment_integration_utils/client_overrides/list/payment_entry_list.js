@@ -62,8 +62,8 @@ function can_make_payment(doc) {
 	)
 		return false;
 
-	// Payment with Link requires contact details
-	// Payment with NEFT | IMPS | RTGS | UPI  requires party bank account
+	// Payment with Link requires contact details.
+	// Payment with NEFT | IMPS | RTGS | UPI  requires party bank account.
 	if (is_link_details_missing(doc) || is_party_bank_account_missing(doc)) return false;
 
 	return true;
