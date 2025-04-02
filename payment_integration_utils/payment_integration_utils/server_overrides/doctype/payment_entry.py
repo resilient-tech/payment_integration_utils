@@ -37,7 +37,7 @@ def onload(doc: PaymentEntry, method=None):
 def validate(doc: PaymentEntry, method=None):
     validate_if_already_paid(doc)
 
-    # to make payment online, bank account is mandatory
+    # to make payment online `bank account` is mandatory
     if not doc.bank_account:
         doc.integration_doctype = ""
         doc.integration_docname = ""
