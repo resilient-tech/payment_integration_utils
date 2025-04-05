@@ -23,7 +23,9 @@ This app provides core utilities to build bank integrations in ERPNext. It inclu
 
 - [ERPNext](https://github.com/frappe/erpnext) Version-15 or above.
 
-### Installation Methods
+- We recommend you to keep **ERPNext** version latest.
+
+Choose one of the following methods to install Payment Integration Utils to your site.
 
 <details>
 <summary>☁️ Frappe Cloud</summary><br>
