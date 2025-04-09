@@ -18,8 +18,6 @@ import pickle
 from base64 import b32encode, b64decode, b64encode
 
 import frappe
-import frappe.defaults
-import frappe.permissions
 import pyotp
 from frappe import _, enqueue, get_system_settings
 from frappe.auth import get_login_attempt_tracker
