@@ -62,15 +62,9 @@ function can_make_payment(doc) {
     )
         return false;
 
-<<<<<<< HEAD
-	// Payment with Link requires contact details.
-	// Payment with NEFT | IMPS | RTGS | UPI  requires party bank account.
-	if (is_link_details_missing(doc) || is_party_bank_account_missing(doc)) return false;
-=======
     // Payment with Link requires contact details
     // Payment with NEFT | IMPS | RTGS | UPI  requires party bank account
     if (is_link_details_missing(doc) || is_party_bank_account_missing(doc)) return false;
->>>>>>> a0d9bea (chore: covert indentation to spaces)
 
     return true;
 }
