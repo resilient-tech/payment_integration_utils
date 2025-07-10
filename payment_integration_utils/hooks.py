@@ -34,4 +34,9 @@ doc_events = {
     },
 }
 
+override_doctype_dashboards = {
+    "Payment Entry": "payment_integration_utils.payment_integration_utils.server_overrides.dashboard.payment_entry.get_dashboard_data",
+}
+
+
 before_payment_authentication = "payment_integration_utils.payment_integration_utils.utils.permission.has_payment_permissions"
