@@ -33,6 +33,25 @@ def onload(doc: PaymentEntry, method=None):
         has_payment_permissions(doc.name, throw=False, ignore_impersonation=True),
     )
 
+    doc.set_onload("payment_transfer_method_options", _transfer_method_options(doc))
+
+
+def _transfer_method_options(doc: PaymentEntry) -> list[str] | None:
+    """First ``payment_transfer_method_options`` hook returning a non-empty list
+    narrows the PE's transfer-method choices to what the claiming integration
+    supports (e.g. a bank with no UPI/Link). ``None`` -> the full default set, so
+    an integration that registers nothing (or none installed) is unaffected. A
+    resolver error degrades to the full set rather than breaking the form."""
+    for path in frappe.get_hooks("payment_transfer_method_options"):
+        try:
+            methods = frappe.get_attr(path)(doc)
+        except Exception:
+            frappe.log_error(title="payment_transfer_method_options resolver failed")
+            continue
+        if methods:
+            return list(methods)
+    return None
+
 
 def validate(doc: PaymentEntry, method=None):
     validate_if_already_paid(doc)
