@@ -26,9 +26,7 @@ const PAYMENT_FIELDS = [
     "reference_no",
 ];
 
-// Narrow the transfer-method Select to the options the claiming integration
-// supports (onload: payment_transfer_method_options); leaves the full default
-// set when none is provided. On a draft, resets a now-invalid value to the first.
+// narrow transfer-method options to integration's supported set
 function apply_transfer_method_options(frm) {
     const options = payment_integration_utils.get_onload(frm, "payment_transfer_method_options");
     if (!options || !options.length) return;
@@ -60,7 +58,6 @@ frappe.ui.form.on("Payment Entry", {
         // user can make payment `on submit`
         update_submit_button_label(frm);
 
-        // narrow transfer-method options to what the claiming integration supports
         apply_transfer_method_options(frm);
     },
 
