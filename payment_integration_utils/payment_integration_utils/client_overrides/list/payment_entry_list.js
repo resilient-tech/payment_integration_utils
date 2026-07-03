@@ -25,9 +25,22 @@ frappe.listview_settings["Payment Entry"] = {
             // flow; everything else falls through to the default submit-then-pay path.
             const { driven, defaults } = partition_by_driver(selected_docs);
 
-            driven.forEach(({ driver, docs }) => driver.bulk(list_view, docs));
+            // One payment flow per run. Mixing backends would stack their
+            // confirm/OTP dialogs and run two money-moving batches at once, so
+            // refuse and let the user narrow the selection.
+            if (driven.length + (defaults.length ? 1 : 0) > 1) {
+                frappe.msgprint({
+                    title: __("Mixed Payment Methods"),
+                    message: __(
+                        "The selected Payment Entries use different payment methods. Select ones that use the same method, then Pay and Submit again."
+                    ),
+                    indicator: "orange",
+                });
+                return;
+            }
 
-            if (defaults.length) default_bulk(list_view, defaults);
+            if (driven.length) driven[0].driver.bulk(list_view, driven[0].docs);
+            else default_bulk(list_view, defaults); // empty -> shows "select valid" message
         });
     },
 };
