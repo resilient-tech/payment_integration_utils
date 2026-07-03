@@ -25,22 +25,30 @@ frappe.listview_settings["Payment Entry"] = {
             // flow; everything else falls through to the default submit-then-pay path.
             const { driven, defaults } = partition_by_driver(selected_docs);
 
-            // One payment flow per run. Mixing backends would stack their
+            // Each driver group is a payment flow; the default path is one too, but
+            // only when it has a payable doc (ineligible rows aren't a "method").
+            const flows = driven.map((group) => () => group.driver.bulk(list_view, group.docs));
+            if (defaults.some(can_make_payment)) {
+                flows.push(() => default_bulk(list_view, defaults));
+            }
+
+            // No payable flow: hand the selection to the default path so its
+            // eligibility message ("select valid entries") still shows.
+            if (!flows.length) return default_bulk(list_view, defaults);
+
+            // Pay one method at a time. A mixed selection would stack the flows'
             // confirm/OTP dialogs and run two money-moving batches at once, so
-            // refuse and let the user narrow the selection.
-            if (driven.length + (defaults.length ? 1 : 0) > 1) {
-                frappe.msgprint({
-                    title: __("Mixed Payment Methods"),
+            // alert and run just one; the user re-runs for the rest.
+            if (flows.length > 1) {
+                frappe.show_alert({
                     message: __(
-                        "The selected Payment Entries use different payment methods. Select ones that use the same method, then Pay and Submit again."
+                        "Selected entries use different payment methods. Paying one method now; re-run Pay and Submit for the rest."
                     ),
                     indicator: "orange",
                 });
-                return;
             }
 
-            if (driven.length) driven[0].driver.bulk(list_view, driven[0].docs);
-            else default_bulk(list_view, defaults); // empty -> shows "select valid" message
+            flows[0]();
         });
     },
 };
@@ -66,6 +74,14 @@ function partition_by_driver(docs) {
             }
             groups.get(doc.integration_doctype).docs.push(doc);
         } else {
+            // A driver with a form handler but no bulk handler would silently pay
+            // via the default path (wrong server API for a pay-first backend).
+            if (driver && !driver.bulk) {
+                console.warn(
+                    `pay_driver for "${doc.integration_doctype}" has no bulk handler; ` +
+                        `falling back to the default path for ${doc.name}.`
+                );
+            }
             defaults.push(doc);
         }
     });
