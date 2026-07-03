@@ -10,6 +10,8 @@ frappe.listview_settings["Payment Entry"] = {
         "party_bank_account",
         "contact_mobile",
         "contact_email",
+        // extra columns a registered pay driver needs for its own eligibility
+        ...pay_driver_fields(),
     ],
 
     onload: function (list_view) {
@@ -18,39 +20,79 @@ frappe.listview_settings["Payment Entry"] = {
 
         list_view.page.add_actions_menu_item(__("Pay and Submit"), () => {
             const selected_docs = list_view.get_checked_items();
-            const marked_docs = [];
-            const unmarked_docs = [];
-            const ineligible_docs = [];
 
-            selected_docs.forEach((doc) => {
-                if (can_make_payment(doc)) {
-                    if (doc.make_bank_online_payment) marked_docs.push(doc);
-                    else unmarked_docs.push(doc);
-                } else {
-                    doc["reason"] = get_ineligibility_reason(doc);
-                    ineligible_docs.push(doc);
-                }
-            });
+            // A backend claiming a PE (via integration_doctype) can swap the bulk
+            // flow; everything else falls through to the default submit-then-pay path.
+            const { driven, defaults } = partition_by_driver(selected_docs);
 
-            if (!marked_docs.length && !unmarked_docs.length) {
-                let message = __("Please select valid payment entries to pay and submit.");
+            driven.forEach(({ driver, docs }) => driver.bulk(list_view, docs));
 
-                if (ineligible_docs.length) {
-                    message += "<br>";
-                    message += get_ineligible_docs_html(
-                        ineligible_docs,
-                        __("View Ineligible Docs ({0})", [ineligible_docs.length])
-                    );
-                }
-
-                frappe.msgprint(message, __("Invalid Selection"));
-                return;
-            }
-
-            show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_docs);
+            if (defaults.length) default_bulk(list_view, defaults);
         });
     },
 };
+
+// #### Driver routing #### //
+// Extra list columns every registered pay driver asked for.
+function pay_driver_fields() {
+    const drivers = payment_integration_utils.pay_drivers || {};
+    return Object.values(drivers).flatMap((driver) => driver.add_fields || []);
+}
+
+// Split selected docs into driver-owned bulk groups (keyed by integration_doctype)
+// and the default remainder.
+function partition_by_driver(docs) {
+    const groups = new Map();
+    const defaults = [];
+
+    docs.forEach((doc) => {
+        const driver = payment_integration_utils.get_pay_driver(doc.integration_doctype);
+        if (driver?.bulk) {
+            if (!groups.has(doc.integration_doctype)) {
+                groups.set(doc.integration_doctype, { driver, docs: [] });
+            }
+            groups.get(doc.integration_doctype).docs.push(doc);
+        } else {
+            defaults.push(doc);
+        }
+    });
+
+    return { driven: [...groups.values()], defaults };
+}
+
+// Default submit-then-pay flow (RazorpayX): confirm, OTP, bulk_pay_and_submit.
+function default_bulk(list_view, selected_docs) {
+    const marked_docs = [];
+    const unmarked_docs = [];
+    const ineligible_docs = [];
+
+    selected_docs.forEach((doc) => {
+        if (can_make_payment(doc)) {
+            if (doc.make_bank_online_payment) marked_docs.push(doc);
+            else unmarked_docs.push(doc);
+        } else {
+            doc["reason"] = get_ineligibility_reason(doc);
+            ineligible_docs.push(doc);
+        }
+    });
+
+    if (!marked_docs.length && !unmarked_docs.length) {
+        let message = __("Please select valid payment entries to pay and submit.");
+
+        if (ineligible_docs.length) {
+            message += "<br>";
+            message += get_ineligible_docs_html(
+                ineligible_docs,
+                __("View Ineligible Docs ({0})", [ineligible_docs.length])
+            );
+        }
+
+        frappe.msgprint(message, __("Invalid Selection"));
+        return;
+    }
+
+    show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_docs);
+}
 
 // #### Utils #### //
 function can_make_payment(doc) {
