@@ -41,11 +41,11 @@ def _transfer_method_options(doc: PaymentEntry) -> list[str] | None:
     for path in frappe.get_hooks("payment_transfer_method_options"):
         try:
             methods = frappe.get_attr(path)(doc)
+            if methods:
+                return list(methods)
         except Exception:
             frappe.log_error(title="payment_transfer_method_options resolver failed")
             continue
-        if methods:
-            return list(methods)
     return None
 
 
