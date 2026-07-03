@@ -30,7 +30,7 @@ const PAYMENT_FIELDS = [
 function apply_transfer_method_options(frm) {
     const options = payment_integration_utils.get_onload(frm, "payment_transfer_method_options");
     if (!options || !options.length) return;
-    frm.set_df_property("payment_transfer_method", "options", options.join("\n"));
+    frm.set_df_property("payment_transfer_method", "options", options);
     if (
         frm.doc.docstatus === 0 &&
         frm.doc.payment_transfer_method &&
