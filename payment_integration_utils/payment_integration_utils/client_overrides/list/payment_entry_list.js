@@ -10,6 +10,8 @@ frappe.listview_settings["Payment Entry"] = {
         "party_bank_account",
         "contact_mobile",
         "contact_email",
+        // extra columns a registered pay driver needs for its own eligibility
+        ...pay_driver_fields(),
     ],
 
     onload: function (list_view) {
@@ -18,39 +20,108 @@ frappe.listview_settings["Payment Entry"] = {
 
         list_view.page.add_actions_menu_item(__("Pay and Submit"), () => {
             const selected_docs = list_view.get_checked_items();
-            const marked_docs = [];
-            const unmarked_docs = [];
-            const ineligible_docs = [];
 
-            selected_docs.forEach((doc) => {
-                if (can_make_payment(doc)) {
-                    if (doc.make_bank_online_payment) marked_docs.push(doc);
-                    else unmarked_docs.push(doc);
-                } else {
-                    doc["reason"] = get_ineligibility_reason(doc);
-                    ineligible_docs.push(doc);
-                }
-            });
+            // A backend claiming a PE (via integration_doctype) can swap the bulk
+            // flow; everything else falls through to the default submit-then-pay path.
+            const { driven, defaults } = partition_by_driver(selected_docs);
 
-            if (!marked_docs.length && !unmarked_docs.length) {
-                let message = __("Please select valid payment entries to pay and submit.");
-
-                if (ineligible_docs.length) {
-                    message += "<br>";
-                    message += get_ineligible_docs_html(
-                        ineligible_docs,
-                        __("View Ineligible Docs ({0})", [ineligible_docs.length])
-                    );
-                }
-
-                frappe.msgprint(message, __("Invalid Selection"));
-                return;
+            // Each driver group is a payment flow; the default path is one too, but
+            // only when it has a payable doc (ineligible rows aren't a "method").
+            const flows = driven.map((group) => () => group.driver.bulk(list_view, group.docs));
+            if (defaults.some(can_make_payment)) {
+                flows.push(() => default_bulk(list_view, defaults));
             }
 
-            show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_docs);
+            // No payable flow: hand the selection to the default path so its
+            // eligibility message ("select valid entries") still shows.
+            if (!flows.length) return default_bulk(list_view, defaults);
+
+            // Pay one method at a time. A mixed selection would stack the flows'
+            // confirm/OTP dialogs and run two money-moving batches at once, so
+            // alert and run just one; the user re-runs for the rest.
+            if (flows.length > 1) {
+                frappe.show_alert({
+                    message: __(
+                        "Selected entries use different payment methods. Paying one method now; re-run Pay and Submit for the rest."
+                    ),
+                    indicator: "orange",
+                });
+            }
+
+            flows[0]();
         });
     },
 };
+
+// #### Driver routing #### //
+// Extra list columns every registered pay driver asked for.
+function pay_driver_fields() {
+    const drivers = payment_integration_utils.pay_drivers || {};
+    return Object.values(drivers).flatMap((driver) => driver.add_fields || []);
+}
+
+// Split selected docs into driver-owned bulk groups (keyed by integration_doctype)
+// and the default remainder.
+function partition_by_driver(docs) {
+    const groups = new Map();
+    const defaults = [];
+
+    docs.forEach((doc) => {
+        const driver = payment_integration_utils.get_pay_driver(doc.integration_doctype);
+        if (driver?.bulk) {
+            if (!groups.has(doc.integration_doctype)) {
+                groups.set(doc.integration_doctype, { driver, docs: [] });
+            }
+            groups.get(doc.integration_doctype).docs.push(doc);
+        } else {
+            // A driver with a form handler but no bulk handler would silently pay
+            // via the default path (wrong server API for a pay-first backend).
+            if (driver && !driver.bulk) {
+                console.warn(
+                    `pay_driver for "${doc.integration_doctype}" has no bulk handler; ` +
+                        `falling back to the default path for ${doc.name}.`
+                );
+            }
+            defaults.push(doc);
+        }
+    });
+
+    return { driven: [...groups.values()], defaults };
+}
+
+// Default submit-then-pay flow (RazorpayX): confirm, OTP, bulk_pay_and_submit.
+function default_bulk(list_view, selected_docs) {
+    const marked_docs = [];
+    const unmarked_docs = [];
+    const ineligible_docs = [];
+
+    selected_docs.forEach((doc) => {
+        if (can_make_payment(doc)) {
+            if (doc.make_bank_online_payment) marked_docs.push(doc);
+            else unmarked_docs.push(doc);
+        } else {
+            doc["reason"] = get_ineligibility_reason(doc);
+            ineligible_docs.push(doc);
+        }
+    });
+
+    if (!marked_docs.length && !unmarked_docs.length) {
+        let message = __("Please select valid payment entries to pay and submit.");
+
+        if (ineligible_docs.length) {
+            message += "<br>";
+            message += get_ineligible_docs_html(
+                ineligible_docs,
+                __("View Ineligible Docs ({0})", [ineligible_docs.length])
+            );
+        }
+
+        frappe.msgprint(message, __("Invalid Selection"));
+        return;
+    }
+
+    show_confirm_dialog(list_view, marked_docs, unmarked_docs, ineligible_docs);
+}
 
 // #### Utils #### //
 function can_make_payment(doc) {

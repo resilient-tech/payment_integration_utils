@@ -126,6 +126,14 @@ frappe.ui.form.on("Payment Entry", {
             frm.set_value("contact_mobile", "");
         }
     },
+
+    make_bank_online_payment: function (frm) {
+        // Flip the primary action live as the checkbox toggles (not just on reload).
+        if (frm.doc.docstatus !== 0 || frm.doc.__islocal || frm.toolbar._has_workflow) return;
+
+        if (frm.doc.make_bank_online_payment) update_submit_button_label(frm);
+        else frm.toolbar.set_primary_action(); // back to the stock Submit
+    },
 });
 
 // ############ HELPERS ############ //
@@ -140,9 +148,12 @@ function update_submit_button_label(frm) {
     )
         return;
 
-    frm.page.set_primary_action(__("Pay and Submit"), () => {
-        frm.savesubmit();
-    });
+    // The backend claiming this PE (via integration_doctype) decides what
+    // "Pay and Submit" does; default is submit-then-pay-on-submit.
+    const driver = payment_integration_utils.get_pay_driver(frm.doc.integration_doctype);
+    const run = driver?.form || ((frm) => frm.savesubmit());
+
+    frm.page.set_primary_action(__("Pay and Submit"), () => run(frm));
 }
 
 // ############ UTILITY ############ //
