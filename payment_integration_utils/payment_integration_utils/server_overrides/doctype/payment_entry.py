@@ -33,6 +33,21 @@ def onload(doc: PaymentEntry, method=None):
         has_payment_permissions(doc.name, throw=False, ignore_impersonation=True),
     )
 
+    doc.set_onload("payment_transfer_method_options", _transfer_method_options(doc))
+
+
+def _transfer_method_options(doc: PaymentEntry) -> list[str] | None:
+    # first hook with a non-empty list wins; None means use default options
+    for path in frappe.get_hooks("payment_transfer_method_options"):
+        try:
+            methods = frappe.get_attr(path)(doc)
+            if methods:
+                return list(methods)
+        except Exception:
+            frappe.log_error(title="payment_transfer_method_options resolver failed")
+            continue
+    return None
+
 
 def validate(doc: PaymentEntry, method=None):
     validate_if_already_paid(doc)

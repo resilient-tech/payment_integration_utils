@@ -26,6 +26,20 @@ const PAYMENT_FIELDS = [
     "reference_no",
 ];
 
+// narrow transfer-method options to integration's supported set
+function apply_transfer_method_options(frm) {
+    const options = payment_integration_utils.get_onload(frm, "payment_transfer_method_options");
+    if (!options || !options.length) return;
+    frm.set_df_property("payment_transfer_method", "options", options);
+    if (
+        frm.doc.docstatus === 0 &&
+        frm.doc.payment_transfer_method &&
+        !options.includes(frm.doc.payment_transfer_method)
+    ) {
+        frm.set_value("payment_transfer_method", options[0]);
+    }
+}
+
 frappe.ui.form.on("Payment Entry", {
     refresh: async function (frm) {
         // Do not allow to edit fields if Payment is processed by RazorpayX in amendment
@@ -43,6 +57,8 @@ frappe.ui.form.on("Payment Entry", {
 
         // user can make payment `on submit`
         update_submit_button_label(frm);
+
+        apply_transfer_method_options(frm);
     },
 
     validate: function (frm) {
