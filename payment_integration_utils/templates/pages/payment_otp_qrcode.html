@@ -1,0 +1,13 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Register your OTP App") }}{% endblock %}
+
+{% block page_content %}
+<h1>{{ _("Register your OTP App") }}</h1>
+<ol>
+    <li>{{ _("Open an authenticator app on your phone.") }}</li>
+    <li>{{ _("Scan this QR code with the app.") }}</li>
+    <li>{{ _("Return to the Enter OTP dialog and type the 6-digit code from the app.") }}</li>
+</ol>
+<img src="data:image/svg+xml;base64,{{ qrcode_svg }}" alt="{{ _('QR code') }}">
+{% endblock %}

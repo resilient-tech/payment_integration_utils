@@ -23,13 +23,11 @@ from frappe import _, enqueue, get_system_settings
 from frappe.auth import get_login_attempt_tracker
 from frappe.twofactor import (
     clear_default,
-    delete_qrimage,
     get_default,
-    get_link_for_qrcode,
     send_token_via_sms,
     set_default,
 )
-from frappe.utils import fmt_money
+from frappe.utils import fmt_money, get_url
 from frappe.utils.password import decrypt, encrypt
 
 from payment_integration_utils.payment_integration_utils.constants.enums import BaseEnum
@@ -186,6 +184,7 @@ class Utils2FA:
     _USER = "_user"
     _TOKEN = "_token"
     _OTP_SECRET = "_otp_secret"
+    _OTP_URI = "_otp_uri"
     _OTP_LOGIN = "_otp_login"
     _AUTHENTICATED = "_authenticated"
     _PAYMENT_ENTRIES = "_payment_entries"
@@ -364,11 +363,16 @@ class Trigger2FA:
         }
 
     def email_2fa_for_otp_app(self):
-        # TODO: new qrcode page for OTP App
         totp_uri = pyotp.TOTP(self.otp_secret).provisioning_uri(
             name=self.user, issuer_name=self.otp_issuer
         )
-        qrcode_link = get_link_for_qrcode(self.user, totp_uri)
+        qrcode_key = frappe.generate_hash(length=20)
+        frappe.cache.set_value(
+            f"{qrcode_key}{Utils2FA._OTP_URI}",
+            totp_uri,
+            expires_in_sec=Utils2FA.OTP_EXPIRY_TIME,
+        )
+        qrcode_link = get_url(f"/payment_otp_qrcode?k={qrcode_key}")
 
         status = Utils2FA.send_authentication_email(
             user=self.user,
@@ -486,7 +490,6 @@ class Authenticate2FA:
 
         if not Utils2FA.get_otp_login(self.user):
             set_default(Utils2FA.get_otp_login_key(self.user), 1)
-            delete_qrimage(self.user)
 
         return self.on_success()
 
